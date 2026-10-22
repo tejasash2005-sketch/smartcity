@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>SENTINEL — Analytics</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Share+Tech+Mono&family=Inter:wght@400;500;600&display=swap');
+  :root{--bg:#010409;--surface:#0d1117;--surface2:#161b22;--border:#21262d;--cyan:#00f5ff;--red:#ff0040;--orange:#ff6b35;--green:#00ff88;--purple:#7c3aed;--text:#e6edf3;--muted:#7d8590;}
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;min-height:100vh;}
+  body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(0,245,255,0.02) 1px,transparent 1px),linear-gradient(90deg,rgba(0,245,255,0.02) 1px,transparent 1px);background-size:50px 50px;pointer-events:none;z-index:0;}
+  .dash-header{position:sticky;top:0;z-index:100;background:rgba(1,4,9,0.95);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);padding:0 1.5rem;height:56px;display:flex;align-items:center;justify-content:space-between;}
+  .dash-brand{font-family:'Orbitron',sans-serif;font-size:1rem;font-weight:900;letter-spacing:4px;background:linear-gradient(90deg,var(--cyan),var(--purple));-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+  .dash-user{display:flex;align-items:center;gap:12px;font-family:'Share Tech Mono',monospace;font-size:0.72rem;color:var(--muted);}
+  .duty-badge{padding:3px 10px;background:rgba(0,255,136,0.1);border:1px solid rgba(0,255,136,0.3);border-radius:4px;color:var(--green);font-size:0.6rem;letter-spacing:1px;}
+  .logout-link{color:var(--red);text-decoration:none;font-family:'Share Tech Mono',monospace;font-size:0.7rem;padding:6px 12px;border:1px solid rgba(255,0,64,0.3);border-radius:4px;}
+  .dash-layout{display:grid;grid-template-columns:220px 1fr;min-height:calc(100vh - 56px);}
+  .sidebar{background:var(--surface);border-right:1px solid var(--border);padding:1.5rem 0;position:sticky;top:56px;height:calc(100vh - 56px);overflow-y:auto;}
+  .sidebar-section{padding:0 1rem;margin-bottom:1.5rem;}
+  .sidebar-label{font-family:'Share Tech Mono',monospace;font-size:0.58rem;letter-spacing:2px;text-transform:uppercase;color:var(--muted);padding:0 0.75rem;margin-bottom:0.5rem;}
+  .sidebar-link{display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:8px;text-decoration:none;color:var(--muted);font-size:0.8rem;transition:all 0.2s;margin-bottom:2px;}
+  .sidebar-link:hover,.sidebar-link.active{background:rgba(0,245,255,0.08);color:var(--cyan);}
+  .sidebar-link svg{width:15px;height:15px;stroke:currentColor;flex-shrink:0;}
+  .badge{margin-left:auto;padding:2px 6px;border-radius:4px;font-size:0.6rem;font-family:'Share Tech Mono',monospace;}
+  .badge-red{background:rgba(255,0,64,0.15);color:var(--red);}
+  .badge-green{background:rgba(0,255,136,0.1);color:var(--green);}
+  .content{padding:2rem;position:relative;z-index:1;}
+  .page-title{font-family:'Orbitron',sans-serif;font-size:1.4rem;font-weight:700;letter-spacing:3px;margin-bottom:4px;}
+  .page-sub{font-size:0.8rem;color:var(--muted);margin-bottom:2rem;}
+  .stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;margin-bottom:2rem;}
+  .stat-box{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:1.2rem;text-align:center;}
+  .stat-num{font-family:'Orbitron',monospace;font-size:1.8rem;font-weight:700;}
+  .stat-lbl{font-family:'Share Tech Mono',monospace;font-size:0.6rem;color:var(--muted);letter-spacing:1px;margin-top:4px;}
+  .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;margin-bottom:1.5rem;}
+  .card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.5rem;}
+  .card-title{font-family:'Orbitron',sans-serif;font-size:0.8rem;letter-spacing:2px;color:var(--muted);margin-bottom:1.2rem;text-transform:uppercase;}
+  .bar-chart{display:flex;align-items:flex-end;gap:8px;height:120px;padding-bottom:4px;}
+  .bar-wrap{display:flex;flex-direction:column;align-items:center;flex:1;gap:4px;}
+  .bar{width:100%;border-radius:4px 4px 0 0;background:linear-gradient(180deg,var(--cyan),rgba(0,245,255,0.3));transition:all 0.3s;min-height:4px;}
+  .bar-lbl{font-family:'Share Tech Mono',monospace;font-size:0.55rem;color:var(--muted);}
+  .bar-val{font-family:'Share Tech Mono',monospace;font-size:0.6rem;color:var(--cyan);}
+  .type-list{display:flex;flex-direction:column;gap:10px;}
+  .type-row{display:flex;align-items:center;gap:10px;}
+  .type-name{font-size:0.8rem;min-width:80px;}
+  .type-bar-bg{flex:1;height:8px;background:var(--border);border-radius:4px;overflow:hidden;}
+  .type-bar-fill{height:100%;border-radius:4px;}
+  .type-pct{font-family:'Share Tech Mono',monospace;font-size:0.65rem;color:var(--muted);min-width:35px;text-align:right;}
+  .zone-table{width:100%;border-collapse:collapse;}
+  .zone-table th{text-align:left;font-family:'Share Tech Mono',monospace;font-size:0.58rem;letter-spacing:2px;color:var(--muted);padding:6px 8px;border-bottom:1px solid var(--border);}
+  .zone-table td{padding:10px 8px;font-size:0.8rem;border-bottom:1px solid rgba(33,38,45,0.4);}
+  .zone-table tr:last-child td{border-bottom:none;}
+  .heat-dot{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:6px;}
+  .full-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.5rem;margin-bottom:1.5rem;}
+</style>
+</head>
+<body>
+<header class="dash-header">
+  <div class="dash-brand">SENTINEL</div>
+  <div class="dash-user">
+    <div class="duty-badge">ON DUTY</div>
+    <span>OFFICER {{ request.user.username|upper }}</span>
+    <a href="/accounts/logout/" class="logout-link">LOGOUT</a>
+  </div>
+</header>
+<div class="dash-layout">
+{% include 'base_nav.html' with active='analytics' %}
+<main class="content">
+  <div class="page-title">ANALYTICS</div>
+  <div class="page-sub">City-wide surveillance intelligence · Last 7 days</div>
+
+  <div class="stats-row">
+    <div class="stat-box"><div class="stat-num" style="color:var(--cyan)">{{ total_incidents }}</div><div class="stat-lbl">INCIDENTS TODAY</div></div>
+    <div class="stat-box"><div class="stat-num" style="color:var(--green)">{{ resolved_pct }}%</div><div class="stat-lbl">RESOLVED RATE</div></div>
+    <div class="stat-box"><div class="stat-num" style="color:var(--orange)">{{ avg_response }}</div><div class="stat-lbl">AVG RESPONSE</div></div>
+    <div class="stat-box"><div class="stat-num" style="color:var(--red)">{{ hotspot }}</div><div class="stat-lbl">HOTSPOT ZONE</div></div>
+  </div>
+
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">Weekly Incident Trend</div>
+      <div class="bar-chart">
+        {% for val in weekly %}
+        <div class="bar-wrap">
+          <div class="bar-val">{{ val }}</div>
+          <div class="bar" style="height:{{ val|add:'0' }}%;{% if forloop.last %}background:linear-gradient(180deg,var(--orange),rgba(255,107,53,0.3));{% endif %}"></div>
+          <div class="bar-lbl">{% if forloop.counter == 1 %}M{% elif forloop.counter == 2 %}T{% elif forloop.counter == 3 %}W{% elif forloop.counter == 4 %}T{% elif forloop.counter == 5 %}F{% elif forloop.counter == 6 %}S{% else %}S{% endif %}</div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">Incidents by Type</div>
+      <div class="type-list">
+        {% for t in by_type %}
+        <div class="type-row">
+          <span class="type-name">{{ t.type }}</span>
+          <div class="type-bar-bg"><div class="type-bar-fill" style="width:{{ t.pct }}%;background:{{ t.color }}"></div></div>
+          <span class="type-pct">{{ t.count }}</span>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+
+  <div class="full-card">
+    <div class="card-title">Zone Activity Report</div>
+    <table class="zone-table">
+      <thead><tr><th>Zone</th><th>Incidents</th><th>Cameras</th><th>Activity Level</th></tr></thead>
+      <tbody>
+        {% for z in zones %}
+        <tr>
+          <td>
+            <span class="heat-dot" style="background:{% if z.incidents > 9 %}var(--red){% elif z.incidents > 5 %}var(--orange){% else %}var(--green){% endif %}"></span>
+            {{ z.name }}
+          </td>
+          <td style="font-family:'Share Tech Mono',monospace;font-size:0.75rem;color:{% if z.incidents > 9 %}var(--red){% elif z.incidents > 5 %}var(--orange){% else %}var(--green){% endif %}">{{ z.incidents }}</td>
+          <td style="font-family:'Share Tech Mono',monospace;font-size:0.75rem;color:var(--muted)">{{ z.cameras }}</td>
+          <td>
+            <div style="height:6px;background:var(--border);border-radius:3px;width:200px;">
+              <div style="height:100%;border-radius:3px;width:{{ z.incidents }}0%;background:{% if z.incidents > 9 %}var(--red){% elif z.incidents > 5 %}var(--orange){% else %}var(--green){% endif %};max-width:100%"></div>
+            </div>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</main>
+</div>
+</body>
+</html>

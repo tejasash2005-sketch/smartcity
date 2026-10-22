@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>SENTINEL — AI Engine</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Share+Tech+Mono&family=Inter:wght@400;500;600&display=swap');
+  :root{--bg:#010409;--surface:#0d1117;--surface2:#161b22;--border:#21262d;--cyan:#00f5ff;--red:#ff0040;--orange:#ff6b35;--green:#00ff88;--purple:#7c3aed;--text:#e6edf3;--muted:#7d8590;}
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;min-height:100vh;}
+  body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(0,245,255,0.02) 1px,transparent 1px),linear-gradient(90deg,rgba(0,245,255,0.02) 1px,transparent 1px);background-size:50px 50px;pointer-events:none;z-index:0;}
+  .dash-header{position:sticky;top:0;z-index:100;background:rgba(1,4,9,0.95);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);padding:0 1.5rem;height:56px;display:flex;align-items:center;justify-content:space-between;}
+  .dash-brand{font-family:'Orbitron',sans-serif;font-size:1rem;font-weight:900;letter-spacing:4px;background:linear-gradient(90deg,var(--cyan),var(--purple));-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+  .dash-user{display:flex;align-items:center;gap:12px;font-family:'Share Tech Mono',monospace;font-size:0.72rem;color:var(--muted);}
+  .duty-badge{padding:3px 10px;background:rgba(0,255,136,0.1);border:1px solid rgba(0,255,136,0.3);border-radius:4px;color:var(--green);font-size:0.6rem;letter-spacing:1px;}
+  .logout-link{color:var(--red);text-decoration:none;font-family:'Share Tech Mono',monospace;font-size:0.7rem;padding:6px 12px;border:1px solid rgba(255,0,64,0.3);border-radius:4px;}
+  .dash-layout{display:grid;grid-template-columns:220px 1fr;min-height:calc(100vh - 56px);}
+  .sidebar{background:var(--surface);border-right:1px solid var(--border);padding:1.5rem 0;position:sticky;top:56px;height:calc(100vh - 56px);overflow-y:auto;}
+  .sidebar-section{padding:0 1rem;margin-bottom:1.5rem;}
+  .sidebar-label{font-family:'Share Tech Mono',monospace;font-size:0.58rem;letter-spacing:2px;text-transform:uppercase;color:var(--muted);padding:0 0.75rem;margin-bottom:0.5rem;}
+  .sidebar-link{display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:8px;text-decoration:none;color:var(--muted);font-size:0.8rem;transition:all 0.2s;margin-bottom:2px;}
+  .sidebar-link:hover,.sidebar-link.active{background:rgba(0,245,255,0.08);color:var(--cyan);}
+  .sidebar-link svg{width:15px;height:15px;stroke:currentColor;flex-shrink:0;}
+  .badge{margin-left:auto;padding:2px 6px;border-radius:4px;font-size:0.6rem;font-family:'Share Tech Mono',monospace;}
+  .badge-red{background:rgba(255,0,64,0.15);color:var(--red);}
+  .badge-green{background:rgba(0,255,136,0.1);color:var(--green);}
+  .content{padding:2rem;position:relative;z-index:1;}
+  .page-title{font-family:'Orbitron',sans-serif;font-size:1.4rem;font-weight:700;letter-spacing:3px;margin-bottom:4px;}
+  .page-sub{font-size:0.8rem;color:var(--muted);margin-bottom:2rem;}
+  .total-banner{background:linear-gradient(135deg,rgba(0,245,255,0.06),rgba(124,58,237,0.06));border:1px solid rgba(0,245,255,0.15);border-radius:10px;padding:1rem 1.5rem;margin-bottom:2rem;display:flex;align-items:center;justify-content:space-between;}
+  .total-label{font-family:'Share Tech Mono',monospace;font-size:0.7rem;color:var(--muted);letter-spacing:2px;}
+  .total-val{font-family:'Orbitron',monospace;font-size:1.6rem;font-weight:700;color:var(--cyan);}
+  .model-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:1rem;}
+  .model-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.3rem;transition:all 0.2s;position:relative;overflow:hidden;}
+  .model-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--accent-color);}
+  .model-card:hover{border-color:rgba(0,245,255,0.2);background:var(--surface2);}
+  .model-head{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:1rem;}
+  .model-name{font-size:0.95rem;font-weight:700;margin-bottom:3px;}
+  .model-type{font-family:'Share Tech Mono',monospace;font-size:0.62rem;color:var(--muted);}
+  .status-active{padding:3px 10px;border-radius:4px;font-family:'Share Tech Mono',monospace;font-size:0.6rem;background:rgba(0,255,136,0.1);color:var(--green);}
+  .status-training{padding:3px 10px;border-radius:4px;font-family:'Share Tech Mono',monospace;font-size:0.6rem;background:rgba(255,107,53,0.1);color:var(--orange);animation:blink 2s infinite;}
+  @keyframes blink{0%,100%{opacity:1;}50%{opacity:0.5;}}
+  .model-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;}
+  .mstat{text-align:center;background:var(--surface2);border-radius:6px;padding:8px;}
+  .mstat-val{font-family:'Orbitron',monospace;font-size:0.9rem;font-weight:700;margin-bottom:2px;}
+  .mstat-lbl{font-family:'Share Tech Mono',monospace;font-size:0.52rem;color:var(--muted);letter-spacing:1px;}
+  .accuracy-bar{margin-top:10px;}
+  .acc-label{display:flex;justify-content:space-between;font-family:'Share Tech Mono',monospace;font-size:0.6rem;color:var(--muted);margin-bottom:4px;}
+  .acc-track{height:4px;background:var(--border);border-radius:2px;}
+  .acc-fill{height:100%;border-radius:2px;}
+</style>
+</head>
+<body>
+<header class="dash-header">
+  <div class="dash-brand">SENTINEL</div>
+  <div class="dash-user">
+    <div class="duty-badge">ON DUTY</div>
+    <span>OFFICER {{ request.user.username|upper }}</span>
+    <a href="/accounts/logout/" class="logout-link">LOGOUT</a>
+  </div>
+</header>
+<div class="dash-layout">
+{% include 'base_nav.html' with active='ai' %}
+<main class="content">
+  <div class="page-title">AI ENGINE</div>
+  <div class="page-sub">Computer vision models powering real-time threat detection</div>
+  <div class="total-banner">
+    <div>
+      <div class="total-label">TOTAL INFERENCES TODAY</div>
+      <div class="total-val">{{ total_inferences|default:"89,302" }}</div>
+    </div>
+    <div style="text-align:right">
+      <div class="total-label">MODELS ACTIVE</div>
+      <div style="font-family:'Orbitron',monospace;font-size:1.6rem;font-weight:700;color:var(--green)">5 / 6</div>
+    </div>
+  </div>
+  <div class="model-grid">
+    {% for m in models %}
+    <div class="model-card" style="--accent-color:{{ m.color }}">
+      <div class="model-head">
+        <div>
+          <div class="model-name">{{ m.name }}</div>
+          <div class="model-type">{{ m.type }}</div>
+        </div>
+        <span class="status-{{ m.status|lower }}">{{ m.status }}</span>
+      </div>
+      <div class="model-stats">
+        <div class="mstat">
+          <div class="mstat-val" style="color:{{ m.color }}">{{ m.accuracy }}</div>
+          <div class="mstat-lbl">ACCURACY</div>
+        </div>
+        <div class="mstat">
+          <div class="mstat-val" style="color:var(--cyan)">{{ m.processed_today }}</div>
+          <div class="mstat-lbl">PROCESSED</div>
+        </div>
+        <div class="mstat">
+          <div class="mstat-val" style="color:{% if m.alerts_today > 2 %}var(--red){% else %}var(--orange){% endif %}">{{ m.alerts_today }}</div>
+          <div class="mstat-lbl">ALERTS</div>
+        </div>
+      </div>
+      <div class="accuracy-bar">
+        <div class="acc-label"><span>Accuracy</span><span>{{ m.accuracy }}</span></div>
+        <div class="acc-track"><div class="acc-fill" style="width:{{ m.accuracy|slice:':-1' }}%;background:{{ m.color }}"></div></div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+</main>
+</div>
+</body>
+</html>

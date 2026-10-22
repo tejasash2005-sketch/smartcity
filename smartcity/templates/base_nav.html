@@ -1,0 +1,122 @@
+<aside class="sidebar">
+
+  <!-- Operations -->
+  <div class="sidebar-section">
+    <div class="sidebar-label">Operations</div>
+
+    <a href="/dashboard/" class="sidebar-link {% if active == 'dashboard' %}active{% endif %}">
+      <span class="icon">
+        <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+      </span>
+      Dashboard
+    </a>
+
+    <a href="/surveillance/" class="sidebar-link {% if active == 'surveillance' %}active{% endif %}">
+      <span class="icon">
+        <svg viewBox="0 0 24 24"><path d="M23 7l-7 5 7 5V7z"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg>
+      </span>
+      Live Feeds <span class="badge badge-green">LIVE</span>
+    </a>
+
+    <a href="/alerts/" class="sidebar-link {% if active == 'alerts' %}active{% endif %}">
+      <span class="icon">
+        <svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+      </span>
+      Alerts <span class="badge badge-red">12</span>
+    </a>
+
+    <a href="/incidents/" class="sidebar-link {% if active == 'incidents' %}active{% endif %}">
+      <span class="icon">
+        <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+      </span>
+      Incidents
+    </a>
+
+    <a href="/cameras/" class="sidebar-link {% if active == 'cameras' %}active{% endif %}">
+      <span class="icon">
+        <svg viewBox="0 0 24 24"><rect x="2" y="8" width="20" height="12" rx="2"/><path d="M10 8V5a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v3"/></svg>
+      </span>
+      Cameras
+    </a>
+  </div>
+
+  <!-- Intelligence -->
+  <div class="sidebar-section">
+    <div class="sidebar-label">Intelligence</div>
+
+    <a href="/analytics/" class="sidebar-link {% if active == 'analytics' %}active{% endif %}">
+      <span class="icon">
+        <svg viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+      </span>
+      Analytics
+    </a>
+
+    <a href="/map/" class="sidebar-link {% if active == 'map' %}active{% endif %}">
+      <span class="icon">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/></svg>
+      </span>
+      City Map
+    </a>
+
+    <a href="/ai/" class="sidebar-link {% if active == 'ai' %}active{% endif %}">
+      <span class="icon">
+        <svg viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="2"/><rect x="9" y="9" width="6" height="6"/></svg>
+      </span>
+      AI Engine
+    </a>
+  </div>
+
+  <!-- Management -->
+  <div class="sidebar-section">
+    <div class="sidebar-label">Management</div>
+
+    <a href="/patrol/" class="sidebar-link {% if active == 'patrol' %}active{% endif %}">
+      <span class="icon">
+        <svg viewBox="0 0 24 24"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/></svg>
+      </span>
+      Patrol
+    </a>
+
+    <a href="/evidence/" class="sidebar-link {% if active == 'evidence' %}active{% endif %}">
+      <span class="icon">
+        <svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/></svg>
+      </span>
+      Evidence
+    </a>
+
+    <a href="/reports/" class="sidebar-link {% if active == 'reports' %}active{% endif %}">
+      <span class="icon">
+        <svg viewBox="0 0 24 24"><polyline points="6 9 6 2 18 2 18 9"/></svg>
+      </span>
+      Reports
+    </a>
+
+    <a href="/notifications/" class="sidebar-link {% if active == 'notifications' %}active{% endif %}">
+      <span class="icon">
+        <svg viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"/></svg>
+      </span>
+      Notifications
+    </a>
+  </div>
+
+  <!-- System -->
+  <div class="sidebar-section">
+    <div class="sidebar-label">System</div>
+
+    <a href="/audit/" class="sidebar-link {% if active == 'audit' %}active{% endif %}">
+      <span class="icon">
+        <svg viewBox="0 0 24 24"><rect x="8" y="2" width="8" height="4" rx="1"/></svg>
+      </span>
+      Audit Log
+    </a>
+
+    <a href="/settings/" class="sidebar-link {% if active == 'settings' %}active{% endif %}">
+      <span class="icon">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/></svg>
+      </span>
+      Settings
+    </a>
+
+  </div>
+
+</aside>

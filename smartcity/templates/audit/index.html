@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>SENTINEL — Audit Log</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Share+Tech+Mono&family=Inter:wght@400;500;600&display=swap');
+  :root{--bg:#010409;--surface:#0d1117;--surface2:#161b22;--border:#21262d;--cyan:#00f5ff;--red:#ff0040;--orange:#ff6b35;--green:#00ff88;--purple:#7c3aed;--text:#e6edf3;--muted:#7d8590;}
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;min-height:100vh;}
+  body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(0,245,255,0.02) 1px,transparent 1px),linear-gradient(90deg,rgba(0,245,255,0.02) 1px,transparent 1px);background-size:50px 50px;pointer-events:none;z-index:0;}
+  .dash-header{position:sticky;top:0;z-index:100;background:rgba(1,4,9,0.95);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);padding:0 1.5rem;height:56px;display:flex;align-items:center;justify-content:space-between;}
+  .dash-brand{font-family:'Orbitron',sans-serif;font-size:1rem;font-weight:900;letter-spacing:4px;background:linear-gradient(90deg,var(--cyan),var(--purple));-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+  .dash-user{display:flex;align-items:center;gap:12px;font-family:'Share Tech Mono',monospace;font-size:0.72rem;color:var(--muted);}
+  .duty-badge{padding:3px 10px;background:rgba(0,255,136,0.1);border:1px solid rgba(0,255,136,0.3);border-radius:4px;color:var(--green);font-size:0.6rem;letter-spacing:1px;}
+  .logout-link{color:var(--red);text-decoration:none;font-family:'Share Tech Mono',monospace;font-size:0.7rem;padding:6px 12px;border:1px solid rgba(255,0,64,0.3);border-radius:4px;}
+  .dash-layout{display:grid;grid-template-columns:220px 1fr;min-height:calc(100vh - 56px);}
+  .sidebar{background:var(--surface);border-right:1px solid var(--border);padding:1.5rem 0;position:sticky;top:56px;height:calc(100vh - 56px);overflow-y:auto;}
+  .sidebar-section{padding:0 1rem;margin-bottom:1.5rem;}
+  .sidebar-label{font-family:'Share Tech Mono',monospace;font-size:0.58rem;letter-spacing:2px;text-transform:uppercase;color:var(--muted);padding:0 0.75rem;margin-bottom:0.5rem;}
+  .sidebar-link{display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:8px;text-decoration:none;color:var(--muted);font-size:0.8rem;transition:all 0.2s;margin-bottom:2px;}
+  .sidebar-link:hover,.sidebar-link.active{background:rgba(0,245,255,0.08);color:var(--cyan);}
+  .sidebar-link svg{width:15px;height:15px;stroke:currentColor;flex-shrink:0;}
+  .badge{margin-left:auto;padding:2px 6px;border-radius:4px;font-size:0.6rem;font-family:'Share Tech Mono',monospace;}
+  .badge-red{background:rgba(255,0,64,0.15);color:var(--red);}
+  .badge-green{background:rgba(0,255,136,0.1);color:var(--green);}
+  .content{padding:2rem;position:relative;z-index:1;}
+  .page-title{font-family:'Orbitron',sans-serif;font-size:1.4rem;font-weight:700;letter-spacing:3px;margin-bottom:4px;}
+  .page-sub{font-size:0.8rem;color:var(--muted);margin-bottom:2rem;}
+  table{width:100%;border-collapse:collapse;background:var(--surface);border:1px solid var(--border);border-radius:10px;overflow:hidden;font-family:'Share Tech Mono',monospace;}
+  th{background:var(--surface2);padding:10px 14px;text-align:left;font-size:0.58rem;letter-spacing:2px;color:var(--muted);border-bottom:1px solid var(--border);}
+  td{padding:10px 14px;font-size:0.72rem;border-bottom:1px solid rgba(33,38,45,0.4);}
+  tr:last-child td{border-bottom:none;}
+  tr:hover td{background:rgba(0,245,255,0.02);}
+  .log-id{color:var(--muted);}
+  .log-time{color:var(--cyan);}
+  .log-user{color:var(--text);}
+  .action-tag{padding:2px 8px;border-radius:3px;font-size:0.62rem;}
+  .action-view{background:rgba(0,245,255,0.08);color:var(--cyan);}
+  .action-access{background:rgba(0,245,255,0.08);color:var(--cyan);}
+  .action-update{background:rgba(255,107,53,0.1);color:var(--orange);}
+  .action-download{background:rgba(124,58,237,0.1);color:var(--purple);}
+  .action-login{background:rgba(0,255,136,0.08);color:var(--green);}
+  .action-close{background:rgba(0,255,136,0.08);color:var(--green);}
+  .status-ok{color:var(--green);}
+  .status-fail{color:var(--red);font-weight:700;}
+  .log-resource{color:var(--muted);}
+</style>
+</head>
+<body>
+<header class="dash-header">
+  <div class="dash-brand">SENTINEL</div>
+  <div class="dash-user">
+    <div class="duty-badge">ON DUTY</div>
+    <span>OFFICER {{ request.user.username|upper }}</span>
+    <a href="/accounts/logout/" class="logout-link">LOGOUT</a>
+  </div>
+</header>
+<div class="dash-layout">
+{% include 'base_nav.html' with active='audit' %}
+<main class="content">
+  <div class="page-title">AUDIT LOG</div>
+  <div class="page-sub">Complete system access and action trail</div>
+  <table>
+    <thead>
+      <tr><th>#</th><th>TIME</th><th>USER</th><th>ACTION</th><th>RESOURCE</th><th>IP ADDRESS</th><th>STATUS</th></tr>
+    </thead>
+    <tbody>
+      {% for l in logs %}
+      <tr>
+        <td class="log-id">#{{ l.id }}</td>
+        <td class="log-time">{{ l.time }}</td>
+        <td class="log-user">{{ l.user }}</td>
+        <td><span class="action-tag action-{{ l.action|lower }}">{{ l.action }}</span></td>
+        <td class="log-resource">{{ l.resource }}</td>
+        <td style="color:var(--muted)">{{ l.ip }}</td>
+        <td class="status-{{ l.status|lower }}">{{ l.status }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</main>
+</div>
+</body>
+</html>

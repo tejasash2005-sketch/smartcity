@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>SENTINEL — Notifications</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Share+Tech+Mono&family=Inter:wght@400;500;600&display=swap');
+  :root{--bg:#010409;--surface:#0d1117;--surface2:#161b22;--border:#21262d;--cyan:#00f5ff;--red:#ff0040;--orange:#ff6b35;--green:#00ff88;--purple:#7c3aed;--text:#e6edf3;--muted:#7d8590;}
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;min-height:100vh;}
+  body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(0,245,255,0.02) 1px,transparent 1px),linear-gradient(90deg,rgba(0,245,255,0.02) 1px,transparent 1px);background-size:50px 50px;pointer-events:none;z-index:0;}
+  .dash-header{position:sticky;top:0;z-index:100;background:rgba(1,4,9,0.95);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);padding:0 1.5rem;height:56px;display:flex;align-items:center;justify-content:space-between;}
+  .dash-brand{font-family:'Orbitron',sans-serif;font-size:1rem;font-weight:900;letter-spacing:4px;background:linear-gradient(90deg,var(--cyan),var(--purple));-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+  .dash-user{display:flex;align-items:center;gap:12px;font-family:'Share Tech Mono',monospace;font-size:0.72rem;color:var(--muted);}
+  .duty-badge{padding:3px 10px;background:rgba(0,255,136,0.1);border:1px solid rgba(0,255,136,0.3);border-radius:4px;color:var(--green);font-size:0.6rem;letter-spacing:1px;}
+  .logout-link{color:var(--red);text-decoration:none;font-family:'Share Tech Mono',monospace;font-size:0.7rem;padding:6px 12px;border:1px solid rgba(255,0,64,0.3);border-radius:4px;}
+  .dash-layout{display:grid;grid-template-columns:220px 1fr;min-height:calc(100vh - 56px);}
+  .sidebar{background:var(--surface);border-right:1px solid var(--border);padding:1.5rem 0;position:sticky;top:56px;height:calc(100vh - 56px);overflow-y:auto;}
+  .sidebar-section{padding:0 1rem;margin-bottom:1.5rem;}
+  .sidebar-label{font-family:'Share Tech Mono',monospace;font-size:0.58rem;letter-spacing:2px;text-transform:uppercase;color:var(--muted);padding:0 0.75rem;margin-bottom:0.5rem;}
+  .sidebar-link{display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:8px;text-decoration:none;color:var(--muted);font-size:0.8rem;transition:all 0.2s;margin-bottom:2px;}
+  .sidebar-link:hover,.sidebar-link.active{background:rgba(0,245,255,0.08);color:var(--cyan);}
+  .sidebar-link svg{width:15px;height:15px;stroke:currentColor;flex-shrink:0;}
+  .badge{margin-left:auto;padding:2px 6px;border-radius:4px;font-size:0.6rem;font-family:'Share Tech Mono',monospace;}
+  .badge-red{background:rgba(255,0,64,0.15);color:var(--red);}
+  .badge-green{background:rgba(0,255,136,0.1);color:var(--green);}
+  .content{padding:2rem;position:relative;z-index:1;max-width:900px;}
+  .page-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:2rem;}
+  .page-title{font-family:'Orbitron',sans-serif;font-size:1.4rem;font-weight:700;letter-spacing:3px;}
+  .page-sub{font-size:0.8rem;color:var(--muted);margin-top:4px;}
+  .unread-badge{padding:5px 14px;background:rgba(255,0,64,0.15);border:1px solid rgba(255,0,64,0.3);border-radius:20px;font-family:'Share Tech Mono',monospace;font-size:0.7rem;color:var(--red);}
+  .notif-list{display:flex;flex-direction:column;gap:8px;}
+  .notif-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.1rem 1.2rem;display:grid;grid-template-columns:auto 1fr auto;gap:1rem;align-items:start;transition:all 0.2s;}
+  .notif-card.unread{border-left:3px solid var(--cyan);background:rgba(0,245,255,0.02);}
+  .notif-card:hover{background:var(--surface2);}
+  .notif-dot{width:10px;height:10px;border-radius:50%;margin-top:4px;flex-shrink:0;}
+  .notif-title{font-size:0.88rem;font-weight:600;margin-bottom:4px;}
+  .notif-body{font-size:0.78rem;color:var(--muted);}
+  .notif-time{font-family:'Share Tech Mono',monospace;font-size:0.6rem;color:var(--muted);white-space:nowrap;}
+  .type-tag{display:inline-block;padding:2px 7px;border-radius:4px;font-family:'Share Tech Mono',monospace;font-size:0.55rem;margin-top:6px;}
+  .type-alert{background:rgba(255,0,64,0.1);color:var(--red);}
+  .type-patrol{background:rgba(0,245,255,0.08);color:var(--cyan);}
+  .type-report{background:rgba(124,58,237,0.1);color:var(--purple);}
+  .type-system{background:rgba(255,107,53,0.1);color:var(--orange);}
+  .type-incident{background:rgba(0,255,136,0.08);color:var(--green);}
+</style>
+</head>
+<body>
+<header class="dash-header">
+  <div class="dash-brand">SENTINEL</div>
+  <div class="dash-user">
+    <div class="duty-badge">ON DUTY</div>
+    <span>OFFICER {{ request.user.username|upper }}</span>
+    <a href="/accounts/logout/" class="logout-link">LOGOUT</a>
+  </div>
+</header>
+<div class="dash-layout">
+{% include 'base_nav.html' with active='notifications' %}
+<main class="content">
+  <div class="page-header">
+    <div>
+      <div class="page-title">NOTIFICATIONS</div>
+      <div class="page-sub">System alerts and updates for your account</div>
+    </div>
+    {% if unread %}<span class="unread-badge">{{ unread }} UNREAD</span>{% endif %}
+  </div>
+  <div class="notif-list">
+    {% for n in notifs %}
+    <div class="notif-card {% if not n.read %}unread{% endif %}">
+      <div class="notif-dot" style="background:{{ n.color }}"></div>
+      <div>
+        <div class="notif-title">{{ n.title }}</div>
+        <div class="notif-body">{{ n.body }}</div>
+        <span class="type-tag type-{{ n.type|lower }}">{{ n.type }}</span>
+      </div>
+      <div class="notif-time">{{ n.time }}</div>
+    </div>
+    {% endfor %}
+  </div>
+</main>
+</div>
+</body>
+</html>

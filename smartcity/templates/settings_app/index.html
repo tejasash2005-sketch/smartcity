@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>SENTINEL — Settings</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Share+Tech+Mono&family=Inter:wght@400;500;600&display=swap');
+  :root{--bg:#010409;--surface:#0d1117;--surface2:#161b22;--border:#21262d;--cyan:#00f5ff;--red:#ff0040;--orange:#ff6b35;--green:#00ff88;--purple:#7c3aed;--text:#e6edf3;--muted:#7d8590;}
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;min-height:100vh;}
+  body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(0,245,255,0.02) 1px,transparent 1px),linear-gradient(90deg,rgba(0,245,255,0.02) 1px,transparent 1px);background-size:50px 50px;pointer-events:none;z-index:0;}
+  .dash-header{position:sticky;top:0;z-index:100;background:rgba(1,4,9,0.95);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);padding:0 1.5rem;height:56px;display:flex;align-items:center;justify-content:space-between;}
+  .dash-brand{font-family:'Orbitron',sans-serif;font-size:1rem;font-weight:900;letter-spacing:4px;background:linear-gradient(90deg,var(--cyan),var(--purple));-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+  .dash-user{display:flex;align-items:center;gap:12px;font-family:'Share Tech Mono',monospace;font-size:0.72rem;color:var(--muted);}
+  .duty-badge{padding:3px 10px;background:rgba(0,255,136,0.1);border:1px solid rgba(0,255,136,0.3);border-radius:4px;color:var(--green);font-size:0.6rem;letter-spacing:1px;}
+  .logout-link{color:var(--red);text-decoration:none;font-family:'Share Tech Mono',monospace;font-size:0.7rem;padding:6px 12px;border:1px solid rgba(255,0,64,0.3);border-radius:4px;}
+  .dash-layout{display:grid;grid-template-columns:220px 1fr;min-height:calc(100vh - 56px);}
+  .sidebar{background:var(--surface);border-right:1px solid var(--border);padding:1.5rem 0;position:sticky;top:56px;height:calc(100vh - 56px);overflow-y:auto;}
+  .sidebar-section{padding:0 1rem;margin-bottom:1.5rem;}
+  .sidebar-label{font-family:'Share Tech Mono',monospace;font-size:0.58rem;letter-spacing:2px;text-transform:uppercase;color:var(--muted);padding:0 0.75rem;margin-bottom:0.5rem;}
+  .sidebar-link{display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:8px;text-decoration:none;color:var(--muted);font-size:0.8rem;transition:all 0.2s;margin-bottom:2px;}
+  .sidebar-link:hover,.sidebar-link.active{background:rgba(0,245,255,0.08);color:var(--cyan);}
+  .sidebar-link svg{width:15px;height:15px;stroke:currentColor;flex-shrink:0;}
+  .badge{margin-left:auto;padding:2px 6px;border-radius:4px;font-size:0.6rem;font-family:'Share Tech Mono',monospace;}
+  .badge-red{background:rgba(255,0,64,0.15);color:var(--red);}
+  .badge-green{background:rgba(0,255,136,0.1);color:var(--green);}
+  .content{padding:2rem;position:relative;z-index:1;max-width:800px;}
+  .page-title{font-family:'Orbitron',sans-serif;font-size:1.4rem;font-weight:700;letter-spacing:3px;margin-bottom:4px;}
+  .page-sub{font-size:0.8rem;color:var(--muted);margin-bottom:2rem;}
+  .settings-section{background:var(--surface);border:1px solid var(--border);border-radius:10px;overflow:hidden;margin-bottom:1.5rem;}
+  .section-head{background:var(--surface2);padding:12px 16px;border-bottom:1px solid var(--border);font-family:'Share Tech Mono',monospace;font-size:0.7rem;letter-spacing:2px;color:var(--cyan);}
+  .setting-row{padding:14px 16px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(33,38,45,0.4);}
+  .setting-row:last-child{border-bottom:none;}
+  .setting-label{font-size:0.85rem;font-weight:500;margin-bottom:3px;}
+  .setting-desc{font-size:0.72rem;color:var(--muted);}
+  .toggle{position:relative;width:44px;height:24px;flex-shrink:0;}
+  .toggle input{opacity:0;width:0;height:0;}
+  .toggle-slider{position:absolute;inset:0;background:var(--border);border-radius:24px;cursor:pointer;transition:0.3s;}
+  .toggle-slider::before{content:'';position:absolute;width:18px;height:18px;left:3px;bottom:3px;background:var(--muted);border-radius:50%;transition:0.3s;}
+  input:checked+.toggle-slider{background:rgba(0,245,255,0.3);}
+  input:checked+.toggle-slider::before{transform:translateX(20px);background:var(--cyan);}
+  .select-input{background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:6px 10px;border-radius:6px;font-family:'Share Tech Mono',monospace;font-size:0.7rem;outline:none;}
+  .save-btn{padding:8px 20px;background:linear-gradient(90deg,var(--cyan),var(--purple));border:none;border-radius:6px;color:#000;font-family:'Orbitron',sans-serif;font-size:0.7rem;font-weight:700;letter-spacing:2px;cursor:pointer;margin-top:1rem;}
+  .user-info{display:flex;align-items:center;gap:12px;}
+  .user-avatar{width:48px;height:48px;border-radius:50%;background:linear-gradient(135deg,var(--cyan),var(--purple));display:flex;align-items:center;justify-content:center;font-size:1.4rem;}
+  .user-name{font-size:0.9rem;font-weight:600;}
+  .user-role{font-family:'Share Tech Mono',monospace;font-size:0.62rem;color:var(--muted);}
+</style>
+</head>
+<body>
+<header class="dash-header">
+  <div class="dash-brand">SENTINEL</div>
+  <div class="dash-user">
+    <div class="duty-badge">ON DUTY</div>
+    <span>OFFICER {{ request.user.username|upper }}</span>
+    <a href="/accounts/logout/" class="logout-link">LOGOUT</a>
+  </div>
+</header>
+<div class="dash-layout">
+{% include 'base_nav.html' with active='settings' %}
+<main class="content">
+  <div class="page-title">SETTINGS</div>
+  <div class="page-sub">System and account configuration</div>
+
+  <div class="settings-section">
+    <div class="section-head">ACCOUNT</div>
+    <div class="setting-row">
+      <div class="user-info">
+        <div class="user-avatar">👮</div>
+        <div>
+          <div class="user-name">{{ username|upper }}</div>
+          <div class="user-role">Surveillance Officer · Zone Command</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="settings-section">
+    <div class="section-head">NOTIFICATIONS</div>
+    <div class="setting-row">
+      <div><div class="setting-label">Critical Alert Sounds</div><div class="setting-desc">Play audio on CRITICAL and HIGH severity alerts</div></div>
+      <label class="toggle"><input type="checkbox" checked><span class="toggle-slider"></span></label>
+    </div>
+    <div class="setting-row">
+      <div><div class="setting-label">Email Digest</div><div class="setting-desc">Send daily summary report to your email</div></div>
+      <label class="toggle"><input type="checkbox" checked><span class="toggle-slider"></span></label>
+    </div>
+    <div class="setting-row">
+      <div><div class="setting-label">Patrol Check-in Alerts</div><div class="setting-desc">Notify when patrol units miss check-in windows</div></div>
+      <label class="toggle"><input type="checkbox"><span class="toggle-slider"></span></label>
+    </div>
+  </div>
+
+  <div class="settings-section">
+    <div class="section-head">AI ENGINE</div>
+    <div class="setting-row">
+      <div><div class="setting-label">Auto-Escalate Critical Detections</div><div class="setting-desc">Automatically raise incidents for CRITICAL AI detections</div></div>
+      <label class="toggle"><input type="checkbox" checked><span class="toggle-slider"></span></label>
+    </div>
+    <div class="setting-row">
+      <div><div class="setting-label">Detection Sensitivity</div><div class="setting-desc">Threshold for AI model alert triggers</div></div>
+      <select class="select-input"><option>HIGH (95%+)</option><option selected>MEDIUM (90%+)</option><option>LOW (85%+)</option></select>
+    </div>
+  </div>
+
+  <div class="settings-section">
+    <div class="section-head">DISPLAY</div>
+    <div class="setting-row">
+      <div><div class="setting-label">Live Feed Refresh Rate</div><div class="setting-desc">How often the dashboard updates data</div></div>
+      <select class="select-input"><option>5 seconds</option><option selected>10 seconds</option><option>30 seconds</option></select>
+    </div>
+    <div class="setting-row">
+      <div><div class="setting-label">Camera Grid Layout</div><div class="setting-desc">Number of cameras shown on live feed</div></div>
+      <select class="select-input"><option>2x2</option><option selected>3x2</option><option>4x3</option></select>
+    </div>
+  </div>
+
+  <button class="save-btn">SAVE SETTINGS</button>
+</main>
+</div>
+</body>
+</html>

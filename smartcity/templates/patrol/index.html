@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>SENTINEL — Patrol</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Share+Tech+Mono&family=Inter:wght@400;500;600&display=swap');
+  :root{--bg:#010409;--surface:#0d1117;--surface2:#161b22;--border:#21262d;--cyan:#00f5ff;--red:#ff0040;--orange:#ff6b35;--green:#00ff88;--purple:#7c3aed;--text:#e6edf3;--muted:#7d8590;}
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;min-height:100vh;}
+  body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(0,245,255,0.02) 1px,transparent 1px),linear-gradient(90deg,rgba(0,245,255,0.02) 1px,transparent 1px);background-size:50px 50px;pointer-events:none;z-index:0;}
+  .dash-header{position:sticky;top:0;z-index:100;background:rgba(1,4,9,0.95);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);padding:0 1.5rem;height:56px;display:flex;align-items:center;justify-content:space-between;}
+  .dash-brand{font-family:'Orbitron',sans-serif;font-size:1rem;font-weight:900;letter-spacing:4px;background:linear-gradient(90deg,var(--cyan),var(--purple));-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+  .dash-user{display:flex;align-items:center;gap:12px;font-family:'Share Tech Mono',monospace;font-size:0.72rem;color:var(--muted);}
+  .duty-badge{padding:3px 10px;background:rgba(0,255,136,0.1);border:1px solid rgba(0,255,136,0.3);border-radius:4px;color:var(--green);font-size:0.6rem;letter-spacing:1px;}
+  .logout-link{color:var(--red);text-decoration:none;font-family:'Share Tech Mono',monospace;font-size:0.7rem;padding:6px 12px;border:1px solid rgba(255,0,64,0.3);border-radius:4px;}
+  .dash-layout{display:grid;grid-template-columns:220px 1fr;min-height:calc(100vh - 56px);}
+  .sidebar{background:var(--surface);border-right:1px solid var(--border);padding:1.5rem 0;position:sticky;top:56px;height:calc(100vh - 56px);overflow-y:auto;}
+  .sidebar-section{padding:0 1rem;margin-bottom:1.5rem;}
+  .sidebar-label{font-family:'Share Tech Mono',monospace;font-size:0.58rem;letter-spacing:2px;text-transform:uppercase;color:var(--muted);padding:0 0.75rem;margin-bottom:0.5rem;}
+  .sidebar-link{display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:8px;text-decoration:none;color:var(--muted);font-size:0.8rem;transition:all 0.2s;margin-bottom:2px;}
+  .sidebar-link:hover,.sidebar-link.active{background:rgba(0,245,255,0.08);color:var(--cyan);}
+  .sidebar-link svg{width:15px;height:15px;stroke:currentColor;flex-shrink:0;}
+  .badge{margin-left:auto;padding:2px 6px;border-radius:4px;font-size:0.6rem;font-family:'Share Tech Mono',monospace;}
+  .badge-red{background:rgba(255,0,64,0.15);color:var(--red);}
+  .badge-green{background:rgba(0,255,136,0.1);color:var(--green);}
+  .content{padding:2rem;position:relative;z-index:1;}
+  .page-title{font-family:'Orbitron',sans-serif;font-size:1.4rem;font-weight:700;letter-spacing:3px;margin-bottom:4px;}
+  .page-sub{font-size:0.8rem;color:var(--muted);margin-bottom:2rem;}
+  .stats-row{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin-bottom:2rem;}
+  .stat-box{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:1.2rem;text-align:center;}
+  .stat-num{font-family:'Orbitron',monospace;font-size:1.8rem;font-weight:700;}
+  .stat-lbl{font-family:'Share Tech Mono',monospace;font-size:0.6rem;color:var(--muted);letter-spacing:1px;margin-top:4px;}
+  .officer-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:1rem;}
+  .officer-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.2rem;display:flex;gap:1rem;align-items:flex-start;transition:all 0.2s;}
+  .officer-card:hover{border-color:rgba(0,245,255,0.2);background:var(--surface2);}
+  .officer-avatar{width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,var(--cyan),var(--purple));display:flex;align-items:center;justify-content:center;font-size:1.2rem;flex-shrink:0;}
+  .officer-name{font-size:0.9rem;font-weight:600;margin-bottom:2px;}
+  .officer-badge{font-family:'Share Tech Mono',monospace;font-size:0.62rem;color:var(--muted);margin-bottom:6px;}
+  .officer-zone{font-size:0.78rem;color:var(--muted);margin-bottom:6px;}
+  .officer-meta{display:flex;gap:8px;align-items:center;flex-wrap:wrap;}
+  .status-pill{padding:2px 8px;border-radius:4px;font-family:'Share Tech Mono',monospace;font-size:0.58rem;}
+  .pill-patrol{background:rgba(0,255,136,0.1);color:var(--green);}
+  .pill-break{background:rgba(255,107,53,0.1);color:var(--orange);}
+  .pill-standby{background:rgba(124,58,237,0.1);color:var(--purple);}
+  .last-check{font-family:'Share Tech Mono',monospace;font-size:0.6rem;color:var(--muted);}
+  .incidents-tag{font-family:'Share Tech Mono',monospace;font-size:0.6rem;padding:2px 7px;border-radius:4px;background:rgba(255,0,64,0.1);color:var(--red);}
+</style>
+</head>
+<body>
+<header class="dash-header">
+  <div class="dash-brand">SENTINEL</div>
+  <div class="dash-user">
+    <div class="duty-badge">ON DUTY</div>
+    <span>OFFICER {{ request.user.username|upper }}</span>
+    <a href="/accounts/logout/" class="logout-link">LOGOUT</a>
+  </div>
+</header>
+<div class="dash-layout">
+{% include 'base_nav.html' with active='patrol' %}
+<main class="content">
+  <div class="page-title">PATROL MANAGEMENT</div>
+  <div class="page-sub">Real-time officer status across all zones</div>
+  <div class="stats-row">
+    <div class="stat-box"><div class="stat-num" style="color:var(--cyan)">{{ officers|length }}</div><div class="stat-lbl">TOTAL OFFICERS</div></div>
+    <div class="stat-box"><div class="stat-num" style="color:var(--green)">{{ active }}</div><div class="stat-lbl">ON PATROL</div></div>
+    <div class="stat-box"><div class="stat-num" style="color:var(--muted)">{{ officers|length|add:"-2" }}</div><div class="stat-lbl">STANDBY / BREAK</div></div>
+  </div>
+  <div class="officer-grid">
+    {% for o in officers %}
+    <div class="officer-card">
+      <div class="officer-avatar">👮</div>
+      <div style="flex:1">
+        <div class="officer-name">{{ o.name }}</div>
+        <div class="officer-badge">Badge: {{ o.badge }} · ID: {{ o.id }}</div>
+        <div class="officer-zone">📍 {{ o.zone }}</div>
+        <div class="officer-meta">
+          <span class="status-pill {% if 'PATROL' in o.status %}pill-patrol{% elif 'BREAK' in o.status %}pill-break{% else %}pill-standby{% endif %}">{{ o.status }}</span>
+          <span class="last-check">Last: {{ o.last_check }}</span>
+          {% if o.incidents > 0 %}<span class="incidents-tag">{{ o.incidents }} incidents</span>{% endif %}
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+</main>
+</div>
+</body>
+</html>

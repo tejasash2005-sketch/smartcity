@@ -1,0 +1,235 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SENTINEL — Camera Network</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Share+Tech+Mono&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+
+<style>
+:root{
+    --bg:#010409;
+    --surface:#0d1117;
+    --surface2:#161b22;
+    --border:#21262d;
+    --cyan:#00f5ff;
+    --red:#ff0040;
+    --green:#00ff88;
+    --text:#e6edf3;
+}
+
+*{margin:0;padding:0;box-sizing:border-box;}
+
+body{
+    background:var(--bg);
+    color:var(--text);
+    font-family:'Inter',sans-serif;
+}
+
+/* HEADER */
+.topbar{
+    height:70px;
+    border-bottom:1px solid var(--border);
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:0 24px;
+    background:#050810;
+}
+
+.logo{
+    font-family:'Orbitron',sans-serif;
+    font-size:1.8rem;
+    letter-spacing:3px;
+}
+
+.officer{
+    font-weight:600;
+}
+
+/* LAYOUT */
+.dash-layout{
+    display:flex;
+    min-height:calc(100vh - 70px);
+}
+
+/* CONTENT */
+.content{
+    flex:1;
+    padding:24px;
+}
+
+/* GRID */
+.feed-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fit, minmax(300px,1fr));
+    gap:20px;
+    margin-bottom:40px;
+}
+
+/* CAMERA CARD */
+.camera-box{
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-radius:12px;
+    overflow:hidden;
+    position:relative;
+    transition:0.2s;
+}
+
+.camera-box:hover{
+    border-color:var(--cyan);
+}
+
+.cam-video{
+    width:100%;
+    height:220px;
+    object-fit:cover;
+    background:black;
+}
+
+.cam-label{
+    position:absolute;
+    top:10px;
+    left:10px;
+    background:rgba(0,0,0,0.7);
+    padding:4px 8px;
+    font-size:0.7rem;
+    color:var(--cyan);
+}
+
+.rec{
+    position:absolute;
+    top:10px;
+    right:10px;
+    color:var(--red);
+    font-size:0.7rem;
+    animation:blink 1s infinite;
+}
+
+@keyframes blink{
+    0%,50%,100%{opacity:1;}
+    25%,75%{opacity:0;}
+}
+
+.camera-info{
+    padding:14px;
+}
+
+.camera-title{
+    font-weight:600;
+}
+
+.camera-status{
+    font-size:0.85rem;
+    color:var(--green);
+}
+
+/* TABLE */
+table{
+    width:100%;
+    border-collapse:collapse;
+    background:var(--surface);
+    border:1px solid var(--border);
+}
+
+th,td{
+    padding:12px;
+    text-align:left;
+}
+
+th{
+    background:var(--surface2);
+    color:var(--cyan);
+}
+
+tr:hover{
+    background:#111827;
+}
+
+/* MOBILE */
+@media(max-width:768px){
+    .feed-grid{
+        grid-template-columns:1fr;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<header class="topbar">
+    <div class="logo">SENTINEL</div>
+    <div class="officer">
+        OFFICER {{ request.user.username|default:"USER"|upper }}
+    </div>
+</header>
+
+<div class="dash-layout">
+
+    {% include 'base_nav.html' with active='cameras' %}
+
+    <main class="content">
+
+        <h2>📡 LIVE CAMERA FEEDS</h2>
+
+        <div class="feed-grid">
+
+            {% for cam in cameras %}
+            <div class="camera-box">
+                <span class="cam-label">{{ cam.id }}</span>
+                <span class="rec">● REC</span>
+
+                <video autoplay muted loop playsinline class="cam-video">
+                    {% if cam.video_url %}
+                        <source src="{{ cam.video_url }}" type="video/mp4">
+                    {% else %}
+                        <source src="{% static 'videos/default.mp4' %}" type="video/mp4">
+                    {% endif %}
+                </video>
+
+                <div class="camera-info">
+                    <div class="camera-title">{{ cam.location }}</div>
+                    <div class="camera-status">{{ cam.status }}</div>
+                </div>
+            </div>
+            {% empty %}
+            <p>No cameras available</p>
+            {% endfor %}
+
+        </div>
+
+        <h2>📋 CAMERA DETAILS</h2>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Location</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                {% for c in cameras %}
+                <tr>
+                    <td>{{ c.id }}</td>
+                    <td>{{ c.location }}</td>
+                    <td>{{ c.status }}</td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="3">No camera data available</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+    </main>
+
+</div>
+
+</body>
+</html>
